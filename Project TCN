@@ -1,0 +1,107 @@
+#!/bin/python3
+
+# STUDENT NAME AND CODE: UDO, ANDERSON ISONG - S2
+
+# PROJECT: PYTHON FUNDAMENTALS
+
+# OBJECTIVE: Create automation to display the operating system information.
+
+import platform
+import socket
+import subprocess
+import psutil
+import time
+import os
+
+# Function to display the OS version and details
+def display_os_details():
+    os_name = platform.system()
+    if os_name == 'Windows':
+        os_version = platform.version()
+        print('Windows version:', os_version)
+    elif os_name == 'Linux':
+        os_details = platform.uname()
+        print(f'{os_details.system} {os_details.release} {os_details.machine}')
+    else:
+        print('Unsupported operating system:', os_name)
+
+print('\n')
+# Function to get the private IP address
+def get_private_ip():
+    try:
+        print('\n')
+        private_ip_process = subprocess.Popen(["ip", "addr", "show", "eth0"], stdout=subprocess.PIPE)
+        private_ip = private_ip_process.communicate()[0].decode().split('\n')[2].split()[1].split('/')[0]
+        return private_ip
+    except Exception as e:
+        return str(e)
+
+print('\n')
+# Function to get the public IP address using a web service
+def get_public_ip():
+    try:
+        print('\n')
+        public_ip_process = subprocess.Popen(["curl", "-s", "https://api.ipify.org"], stdout=subprocess.PIPE)
+        public_ip = public_ip_process.communicate()[0].decode().strip()
+        return public_ip
+    except Exception as e:
+        return str(e)
+
+# Function to get the default gateway
+def get_default_gateway():
+    try:
+        print('\n')
+        gateway_process = subprocess.Popen(["ip", "route"], stdout=subprocess.PIPE)
+        gateway = gateway_process.communicate()[0].decode().split('\n')[0].split()[2]
+        return gateway
+    except Exception as e:
+        return str(e)
+
+# Function to display disk usage
+def display_disk_usage():
+    try:
+        print('\n')
+        disk_usage = psutil.disk_usage('/')
+        print(f"Disk size: {disk_usage.total / (1024 * 1024 * 1024):.2f} GB")
+        print(f"Free space: {disk_usage.free / (1024 * 1024 * 1024):.2f} GB")
+        print(f"Used space: {disk_usage.used / (1024 * 1024 * 1024):.2f} GB")
+    except Exception as e:
+        print(f"Error: {str(e)}")
+
+# Function to display the top 5 directories and their sizes in /home/kali
+def display_top_directories():
+    try:
+        print('\n')
+        print("*" * 5, "Top 5 directories in /home/kali", "*" * 5)
+        dir_sizes = os.popen("du -h /home/kali/* | sort -rh | head -n 5").read().split('\n')
+        for item in dir_sizes:
+            if item:
+                size, path = item.split()
+                print(f"{path}\t{size}")
+        print()
+    except Exception as e:
+        print(f"Error: {str(e)}")
+
+
+# Function to display CPU usage every 10 seconds
+def display_cpu_usage():
+    try:
+        while True:
+            cpu_percent = psutil.cpu_percent()
+            print(f"CPU usage: {cpu_percent}%")
+            time.sleep(10)
+    except KeyboardInterrupt:
+        print("CPU usage monitoring stopped.")
+
+
+if __name__ == "__main__":
+    display_os_details()
+    private_ip = get_private_ip()
+    print(f"Private IP address: {private_ip}")
+    public_ip = get_public_ip()
+    print(f"Public IP address: {public_ip}")
+    gateway = get_default_gateway()
+    print(f"Default gateway: {gateway}")
+    display_disk_usage()
+    display_top_directories()
+    display_cpu_usage()
